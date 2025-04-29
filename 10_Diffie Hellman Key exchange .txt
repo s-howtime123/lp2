@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Diffie-Hellman Key Exchange</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input,
+    button {
+      margin: 5px 0;
+      padding: 8px;
+    }
+    .result {
+      margin-top: 20px;
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Diffie-Hellman Key Exchange</h2>
+  
+  <label>Prime number (p):</label><br />
+  <input type="number" id="prime" value="23" /><br />
+  
+  <label>Primitive root (g):</label><br />
+  <input type="number" id="base" value="5" /><br />
+  
+  <label>Alice's private key (a):</label><br />
+  <input type="number" id="alicePrivate" /><br />
+  
+  <label>Bob's private key (b):</label><br />
+  <input type="number" id="bobPrivate" /><br />
+  
+  <button onclick="performKeyExchange()">Exchange Keys</button>
+  
+  <div class="result" id="output"></div>
+
+  <script>
+    function modPow(base, exponent, modulus) {
+      if (modulus === 1) return 0;
+      let result = 1;
+      base = base % modulus;
+      while (exponent > 0) {
+        if (exponent % 2 === 1) {
+          result = (result * base) % modulus;
+        }
+        exponent = exponent >> 1;
+        base = (base * base) % modulus;
+      }
+      return result;
+    }
+
+    function performKeyExchange() {
+      const p = parseInt(document.getElementById("prime").value);
+      const g = parseInt(document.getElementById("base").value);
+      const a = parseInt(document.getElementById("alicePrivate").value);
+      const b = parseInt(document.getElementById("bobPrivate").value);
+
+      if (!a || a <= 0 || !b || b <= 0) {
+        alert("Please enter valid private keys for both Alice and Bob.");
+        return;
+      }
+
+      const A = modPow(g, a, p); // Alice's public key
+      const B = modPow(g, b, p); // Bob's public key
+
+      const aliceShared = modPow(B, a, p); // Shared secret for Alice
+      const bobShared = modPow(A, b, p);   // Shared secret for Bob
+
+      const output = document.getElementById("output");
+      output.innerHTML = `
+        <strong>Alice sends A = g^a mod p:</strong> ${A}<br>
+        <strong>Bob sends B = g^b mod p:</strong> ${B}<br>
+        <strong>Alice computes shared secret:</strong> ${aliceShared}<br>
+        <strong>Bob computes shared secret:</strong> ${bobShared}<br>
+        <strong>✅ Shared secrets match:</strong> ${aliceShared === bobShared}
+      `;
+    }
+  </script>
+</body>
+</html>
